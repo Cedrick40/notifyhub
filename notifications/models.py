@@ -13,6 +13,9 @@ class Client(models.Model):
     api_key_hash = models.CharField(max_length=64, unique=True)
     role = models.CharField(max_length=20, choices=Role.choices, default=Role.PRODUCER)
     created_at = models.DateTimeField(auto_now_add=True)
+    @property
+    def is_authenticated(self):
+        return True
 
     def __str__(self):
         return self.name
