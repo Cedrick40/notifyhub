@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.validators import validate_email
 from rest_framework import serializers
 
-from .models import Notification
+from .models import Notification, NotificationAttempt
 
 REQUIRED_PAYLOAD_KEYS = {
     "email": ["subject", "body"],
@@ -46,3 +46,33 @@ class NotificationCreateSerializer(serializers.ModelSerializer):
                 {"payload": f"Missing required fields: {', '.join(missing)}."}
             )
         return attrs
+
+class AttemptSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NotificationAttempt
+        fields = ["attempt_no", "started_at", "finished_at", "outcome", "error_detail"]
+        read_only_fields = fields
+
+
+class NotificationSummarySerializer(serializers.ModelSerializer):
+    """Compact shape for lists."""
+
+    class Meta:
+        model = Notification
+        fields = ["id", "channel", "recipient", "status", "attempt_count", "created_at", "updated_at"]
+        read_only_fields = fields
+
+
+class NotificationDetailSerializer(serializers.ModelSerializer):
+    """Full shape for one job, including every delivery attempt."""
+
+    attempts = AttemptSerializer(source="attempt_log", many=True, read_only=True)
+
+    class Meta:
+        model = Notification
+        fields = [
+            "id", "channel", "recipient", "payload", "priority", "status",
+            "attempt_count", "max_attempts", "next_attempt_at", "last_error",
+            "created_at", "updated_at", "attempts",
+        ]
+        read_only_fields = fields
