@@ -151,3 +151,19 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "Accepts notification jobs, queues work, retries failures and exposes status.",
     "VERSION": "1.0.0",
 }
+
+DEFAULT_FROM_EMAIL = "notifications@notifyhub.local"
+
+# Celery
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1          # a worker reserves one job at a time
+CELERY_BROKER_TRANSPORT_OPTIONS = {"visibility_timeout": 3600}
+
+# Delivery behaviour
+NOTIFY_RETRY_BASE_SECONDS = float(os.getenv("NOTIFY_RETRY_BASE_SECONDS", "5"))
+NOTIFY_RETRY_CAP_SECONDS = float(os.getenv("NOTIFY_RETRY_CAP_SECONDS", "900"))
+NOTIFY_LEASE_SECONDS = int(os.getenv("NOTIFY_LEASE_SECONDS", "60"))
+
+# Simulated provider failure rates (0.0 to 1.0)
+FAKE_TRANSIENT_RATE = float(os.getenv("FAKE_TRANSIENT_RATE", "0.3"))
+FAKE_PERMANENT_RATE = float(os.getenv("FAKE_PERMANENT_RATE", "0.05"))

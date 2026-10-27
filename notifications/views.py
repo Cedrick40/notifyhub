@@ -5,6 +5,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from .models import Client, Notification
+from .tasks import enqueue_notification
 from .serializers import (
     NotificationCreateSerializer,
     NotificationDetailSerializer,
@@ -82,7 +83,7 @@ class NotificationListCreateView(generics.ListAPIView):
         try:
             with transaction.atomic():
                 notification = serializer.save(client=client, idempotency_key=key)
-                # Step 7: transaction.on_commit(lambda: send_notification.delay(str(notification.id)))
+                transaction.on_commit(lambda: enqueue_notification(str(notification.id)))
         except IntegrityError:
             notification = Notification.objects.get(client=client, idempotency_key=key)
             response = Response(
