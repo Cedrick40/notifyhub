@@ -1,0 +1,5 @@
+ status | count 
+--------+-------
+ queued |     1
+(1 row)
+

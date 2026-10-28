@@ -1,0 +1,554 @@
+openapi: 3.0.3
+info:
+  title: Notification & Job Processing Service
+  version: 1.0.0
+  description: Accepts notification jobs, queues work, retries failures and exposes
+    status.
+paths:
+  /health:
+    get:
+      operationId: health_retrieve
+      summary: Health check
+      tags:
+      - health
+      responses:
+        '200':
+          description: No response body
+  /schema/:
+    get:
+      operationId: schema_retrieve
+      description: |-
+        OpenApi3 schema for this API. Format can be selected via content negotiation.
+
+        - YAML: application/vnd.oai.openapi
+        - JSON: application/vnd.oai.openapi+json
+      parameters:
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+          - yaml
+      - in: query
+        name: lang
+        schema:
+          type: string
+          enum:
+          - af
+          - ar
+          - ar-dz
+          - ast
+          - az
+          - be
+          - bg
+          - bn
+          - br
+          - bs
+          - ca
+          - ckb
+          - cs
+          - cy
+          - da
+          - de
+          - dsb
+          - el
+          - en
+          - en-au
+          - en-gb
+          - eo
+          - es
+          - es-ar
+          - es-co
+          - es-mx
+          - es-ni
+          - es-ve
+          - et
+          - eu
+          - fa
+          - fi
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - he
+          - hi
+          - hr
+          - hsb
+          - hu
+          - hy
+          - ia
+          - id
+          - ig
+          - io
+          - is
+          - it
+          - ja
+          - ka
+          - kab
+          - kk
+          - km
+          - kn
+          - ko
+          - ky
+          - lb
+          - lt
+          - lv
+          - mk
+          - ml
+          - mn
+          - mr
+          - ms
+          - my
+          - nb
+          - ne
+          - nl
+          - nn
+          - os
+          - pa
+          - pl
+          - pt
+          - pt-br
+          - ro
+          - ru
+          - sk
+          - sl
+          - sq
+          - sr
+          - sr-latn
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - tk
+          - tr
+          - tt
+          - udm
+          - ug
+          - uk
+          - ur
+          - uz
+          - vi
+          - zh-hans
+          - zh-hant
+      tags:
+      - schema
+      security:
+      - ApiKeyAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/vnd.oai.openapi:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/yaml:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/vnd.oai.openapi+json:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /v1/health:
+    get:
+      operationId: v1_health_retrieve
+      summary: Health check
+      tags:
+      - v1
+      responses:
+        '200':
+          description: No response body
+  /v1/metrics:
+    get:
+      operationId: v1_metrics_retrieve
+      summary: Metrics endpoint (operator only)
+      tags:
+      - v1
+      security:
+      - ApiKeyAuth: []
+      responses:
+        '200':
+          description: No response body
+  /v1/notifications:
+    get:
+      operationId: v1_notifications_list
+      summary: List notifications
+      parameters:
+      - in: query
+        name: channel
+        schema:
+          type: string
+          enum:
+          - email
+          - push
+          - sms
+      - in: query
+        name: created_after
+        schema:
+          type: string
+        description: ISO datetime filter
+      - in: query
+        name: created_before
+        schema:
+          type: string
+        description: ISO datetime filter
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - cancelled
+          - dead
+          - processing
+          - queued
+          - retrying
+          - succeeded
+      tags:
+      - v1
+      security:
+      - ApiKeyAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedNotificationSummaryList'
+          description: ''
+    post:
+      operationId: v1_notifications_create
+      summary: Submit a notification
+      parameters:
+      - in: header
+        name: Idempotency-Key
+        schema:
+          type: string
+        description: Unique per logical notification, 1 to 100 characters. Repeating
+          it returns the original job.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NotificationCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/NotificationCreate'
+        required: true
+      security:
+      - ApiKeyAuth: []
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationCreate'
+          description: ''
+  /v1/notifications/{id}:
+    get:
+      operationId: v1_notifications_retrieve
+      summary: Get one notification with its attempt history
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - ApiKeyAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationDetail'
+          description: ''
+  /v1/notifications/{id}/cancel:
+    post:
+      operationId: v1_notifications_cancel_create
+      summary: Cancel a notification (operator only)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - ApiKeyAuth: []
+      responses:
+        '200':
+          description: No response body
+  /v1/notifications/{id}/requeue:
+    post:
+      operationId: v1_notifications_requeue_create
+      summary: Requeue a dead notification (operator only)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - ApiKeyAuth: []
+      responses:
+        '200':
+          description: No response body
+components:
+  schemas:
+    Attempt:
+      type: object
+      properties:
+        attempt_no:
+          type: integer
+          readOnly: true
+        started_at:
+          type: string
+          format: date-time
+          readOnly: true
+        finished_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        outcome:
+          allOf:
+          - $ref: '#/components/schemas/OutcomeEnum'
+          readOnly: true
+        error_detail:
+          type: string
+          readOnly: true
+      required:
+      - attempt_no
+      - error_detail
+      - finished_at
+      - outcome
+      - started_at
+    ChannelEnum:
+      enum:
+      - email
+      - sms
+      - push
+      type: string
+      description: |-
+        * `email` - Email
+        * `sms` - Sms
+        * `push` - Push
+    NotificationCreate:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        channel:
+          $ref: '#/components/schemas/ChannelEnum'
+        recipient:
+          type: string
+          maxLength: 255
+        payload: {}
+        priority:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        status:
+          allOf:
+          - $ref: '#/components/schemas/StatusEnum'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - channel
+      - created_at
+      - id
+      - payload
+      - recipient
+      - status
+    NotificationDetail:
+      type: object
+      description: Full shape for one job, including every delivery attempt.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        channel:
+          allOf:
+          - $ref: '#/components/schemas/ChannelEnum'
+          readOnly: true
+        recipient:
+          type: string
+          readOnly: true
+        payload:
+          readOnly: true
+        priority:
+          type: integer
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/StatusEnum'
+          readOnly: true
+        attempt_count:
+          type: integer
+          readOnly: true
+        max_attempts:
+          type: integer
+          readOnly: true
+        next_attempt_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        last_error:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        attempts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Attempt'
+          readOnly: true
+      required:
+      - attempt_count
+      - attempts
+      - channel
+      - created_at
+      - id
+      - last_error
+      - max_attempts
+      - next_attempt_at
+      - payload
+      - priority
+      - recipient
+      - status
+      - updated_at
+    NotificationSummary:
+      type: object
+      description: Compact shape for lists.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        channel:
+          allOf:
+          - $ref: '#/components/schemas/ChannelEnum'
+          readOnly: true
+        recipient:
+          type: string
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/StatusEnum'
+          readOnly: true
+        attempt_count:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - attempt_count
+      - channel
+      - created_at
+      - id
+      - recipient
+      - status
+      - updated_at
+    OutcomeEnum:
+      enum:
+      - success
+      - transient_failure
+      - permanent_failure
+      type: string
+      description: |-
+        * `success` - Success
+        * `transient_failure` - Transient Failure
+        * `permanent_failure` - Permanent Failure
+    PaginatedNotificationSummaryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotificationSummary'
+    StatusEnum:
+      enum:
+      - queued
+      - processing
+      - retrying
+      - succeeded
+      - dead
+      - cancelled
+      type: string
+      description: |-
+        * `queued` - Queued
+        * `processing` - Processing
+        * `retrying` - Retrying
+        * `succeeded` - Succeeded
+        * `dead` - Dead
+        * `cancelled` - Cancelled
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key

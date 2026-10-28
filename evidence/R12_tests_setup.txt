@@ -1,0 +1,27 @@
+Creating test database for alias 'default'...
+{"timestamp": "2026-10-28T15:29:05.266827Z", "level": "INFO", "logger": "notifications.request", "message": "{\"event\": \"http_request\", \"method\": \"POST\", \"path\": \"/v1/notifications\", \"status_code\": 401, \"duration_ms\": 197, \"correlation_id\": \"12c47c92-5f81-4508-a978-8de2aa6685c4\"}"}
+{"timestamp": "2026-10-28T15:29:06.033579Z", "level": "WARNING", "logger": "django.request", "message": "Unauthorized: /v1/notifications"}
+.{"timestamp": "2026-10-28T15:29:08.023663Z", "level": "INFO", "logger": "notifications.request", "message": "{\"event\": \"http_request\", \"method\": \"POST\", \"path\": \"/v1/notifications\", \"status_code\": 202, \"duration_ms\": 1555, \"correlation_id\": \"1c6e4ded-ac09-4565-84fa-34977cf28c72\"}"}
+{"timestamp": "2026-10-28T15:29:11.268260Z", "level": "INFO", "logger": "notifications.request", "message": "{\"event\": \"http_request\", \"method\": \"GET\", \"path\": \"/v1/notifications/524f3c7c-9b45-4696-a0db-9fed9d0e83fe\", \"status_code\": 200, \"duration_ms\": 3021, \"correlation_id\": \"e3a450b4-c14c-4383-b434-4af52808019e\"}"}
+.{"timestamp": "2026-10-28T15:29:13.264475Z", "level": "INFO", "logger": "notifications.request", "message": "{\"event\": \"http_request\", \"method\": \"POST\", \"path\": \"/v1/notifications\", \"status_code\": 202, \"duration_ms\": 212, \"correlation_id\": \"efc9744a-e0cd-4807-94f7-b20071e87b73\"}"}
+{"timestamp": "2026-10-28T15:29:13.490070Z", "level": "INFO", "logger": "notifications.request", "message": "{\"event\": \"http_request\", \"method\": \"GET\", \"path\": \"/v1/notifications/84463ced-2ee7-4aef-b66f-093c6be8ca8f\", \"status_code\": 404, \"duration_ms\": 130, \"correlation_id\": \"b441d8bb-1f64-4206-aef2-a195cfca05e6\"}"}
+{"timestamp": "2026-10-28T15:29:13.506316Z", "level": "WARNING", "logger": "django.request", "message": "Not Found: /v1/notifications/84463ced-2ee7-4aef-b66f-093c6be8ca8f"}
+.{"timestamp": "2026-10-28T15:29:15.419358Z", "level": "INFO", "logger": "notifications.request", "message": "{\"event\": \"http_request\", \"method\": \"POST\", \"path\": \"/v1/notifications\", \"status_code\": 202, \"duration_ms\": 1343, \"correlation_id\": \"3c5c5146-8c0f-446e-bbea-af92499ff7e2\"}"}
+{"timestamp": "2026-10-28T15:29:18.078067Z", "level": "INFO", "logger": "notifications.request", "message": "{\"event\": \"http_request\", \"method\": \"POST\", \"path\": \"/v1/notifications\", \"status_code\": 202, \"duration_ms\": 2386, \"correlation_id\": \"4ebf0f13-0d56-46bf-8459-7b099ed5e167\"}"}
+.{"timestamp": "2026-10-28T15:29:21.104292Z", "level": "INFO", "logger": "notifications.request", "message": "{\"event\": \"http_request\", \"method\": \"POST\", \"path\": \"/v1/notifications\", \"status_code\": 202, \"duration_ms\": 540, \"correlation_id\": \"9391bcd0-dea6-4815-a8c5-c4737e04770c\"}"}
+{"timestamp": "2026-10-28T15:29:21.483498Z", "level": "INFO", "logger": "notifications.request", "message": "{\"event\": \"http_request\", \"method\": \"POST\", \"path\": \"/v1/notifications/498920e6-f7f2-4fa5-b3f3-1a482d68ff42/requeue\", \"status_code\": 200, \"duration_ms\": 372, \"correlation_id\": \"1af8f27d-7cdc-4523-9b37-44a1b1618d46\"}"}
+.{"timestamp": "2026-10-28T15:29:21.546562Z", "level": "INFO", "logger": "notifications.request", "message": "{\"event\": \"http_request\", \"method\": \"POST\", \"path\": \"/v1/notifications\", \"status_code\": 202, \"duration_ms\": 41, \"correlation_id\": \"497a6e60-f712-437a-9b8d-7de2649e281b\"}"}
+{"timestamp": "2026-10-28T15:29:21.591602Z", "level": "INFO", "logger": "notifications.request", "message": "{\"event\": \"http_request\", \"method\": \"POST\", \"path\": \"/v1/notifications/360d6bfd-f65a-4373-818a-6a9687230a15/requeue\", \"status_code\": 403, \"duration_ms\": 29, \"correlation_id\": \"c8ed1232-a6c7-468a-a19f-d493da91aedd\"}"}
+{"timestamp": "2026-10-28T15:29:21.647544Z", "level": "WARNING", "logger": "django.request", "message": "Forbidden: /v1/notifications/360d6bfd-f65a-4373-818a-6a9687230a15/requeue"}
+.{"timestamp": "2026-10-28T15:29:21.708059Z", "level": "INFO", "logger": "notifications.request", "message": "{\"event\": \"http_request\", \"method\": \"POST\", \"path\": \"/v1/notifications\", \"status_code\": 400, \"duration_ms\": 13, \"correlation_id\": \"7229cf7a-20f3-4dce-b17d-dc19b2f436f7\"}"}
+{"timestamp": "2026-10-28T15:29:21.712782Z", "level": "WARNING", "logger": "django.request", "message": "Bad Request: /v1/notifications"}
+.{"timestamp": "2026-10-28T15:29:21.773778Z", "level": "INFO", "logger": "notifications.request", "message": "{\"event\": \"http_request\", \"method\": \"POST\", \"path\": \"/v1/notifications\", \"status_code\": 400, \"duration_ms\": 13, \"correlation_id\": \"769b4267-0140-45fa-bb34-053cce6c2d19\"}"}
+{"timestamp": "2026-10-28T15:29:21.774052Z", "level": "WARNING", "logger": "django.request", "message": "Bad Request: /v1/notifications"}
+.
+----------------------------------------------------------------------
+Ran 8 tests in 17.830s
+
+OK
+Destroying test database for alias 'default'...
+Found 8 test(s).
+System check identified no issues (0 silenced).

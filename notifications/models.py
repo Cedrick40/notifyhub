@@ -93,3 +93,38 @@ class NotificationAttempt(models.Model):
                 fields=["notification", "attempt_no"], name="uniq_notification_attempt_no"
             )
         ]
+
+
+class AuditLog(models.Model):
+    """Structured audit events for state-changing actions."""
+
+    class Action(models.TextChoices):
+        SUBMITTED = "submitted"
+        ENQUEUED = "enqueued"
+        STARTED = "started"
+        RETRIED = "retried"
+        SUCCEEDED = "succeeded"
+        DEAD = "dead"
+        REQUEUED = "requeued"
+        CANCELLED = "cancelled"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    notification = models.ForeignKey(
+        Notification, on_delete=models.SET_NULL, null=True, blank=True, related_name="audit_logs"
+    )
+    client = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True, blank=True)
+    action = models.CharField(max_length=20, choices=Action.choices)
+    correlation_id = models.CharField(max_length=64, blank=True)
+    metadata = models.JSONField(default=dict, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["notification", "created_at"]),
+            models.Index(fields=["action", "created_at"]),
+        ]
+
+    def __str__(self):
+        return f"{self.action} {self.notification_id} at {self.created_at}"

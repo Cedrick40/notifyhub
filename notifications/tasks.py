@@ -8,6 +8,7 @@ from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 
+from .audit import log_audit
 from .models import Notification, NotificationAttempt
 from .providers import PermanentError, TransientError, deliver
 
@@ -50,6 +51,10 @@ def claim_notification(notification_id):
             attempt_no=notification.attempt_count,
             started_at=now,
         )
+    try:
+        log_audit("started", notification=notification, client=notification.client)
+    except Exception:
+        pass
     return notification, attempt
 
 
@@ -57,12 +62,12 @@ def _finish(notification, attempt, outcome, error, new_status, delay=None):
     now = timezone.now()
     with transaction.atomic():
         attempt.outcome = outcome
-        attempt.error_detail = error
+        attempt.error_detail = error[:1000] if error else ""
         attempt.finished_at = now
         attempt.save(update_fields=["outcome", "error_detail", "finished_at"])
 
         notification.status = new_status
-        notification.last_error = error
+        notification.last_error = (error or "")[:2000]
         notification.locked_until = None
         notification.next_attempt_at = now + timedelta(seconds=delay) if delay else None
         notification.save(
@@ -80,16 +85,32 @@ def send_notification(self, notification_id):
         deliver(notification)
     except PermanentError as exc:
         _finish(notification, attempt, Outcome.PERMANENT_FAILURE, str(exc), Status.DEAD)
+        try:
+            log_audit("dead", notification=notification, client=notification.client, metadata={"reason": "permanent"})
+        except Exception:
+            pass
         return "dead"
     except TransientError as exc:
         if notification.attempt_count >= notification.max_attempts:
             _finish(notification, attempt, Outcome.TRANSIENT_FAILURE, str(exc), Status.DEAD)
+            try:
+                log_audit("dead", notification=notification, client=notification.client, metadata={"reason": "exhausted"})
+            except Exception:
+                pass
             return "dead"
         delay = backoff_seconds(notification.attempt_count)
         _finish(notification, attempt, Outcome.TRANSIENT_FAILURE, str(exc), Status.RETRYING, delay)
+        try:
+            log_audit("retried", notification=notification, client=notification.client, metadata={"delay": delay, "attempt": notification.attempt_count})
+        except Exception:
+            pass
         raise self.retry(countdown=delay)
     else:
         _finish(notification, attempt, Outcome.SUCCESS, "", Status.SUCCEEDED)
+        try:
+            log_audit("succeeded", notification=notification, client=notification.client)
+        except Exception:
+            pass
         return "succeeded"
 
 
@@ -97,5 +118,13 @@ def enqueue_notification(notification_id: str):
     """Hand a job to the queue. The job is already safe in Postgres, so a queue outage must not break the request."""
     try:
         send_notification.delay(notification_id)
+        try:
+            from .models import Notification
+
+            n = Notification.objects.filter(pk=notification_id).first()
+            if n:
+                log_audit("enqueued", notification=n, client=n.client)
+        except Exception:
+            pass
     except Exception:
         logger.exception("Could not enqueue %s; the reconciler will recover it", notification_id)

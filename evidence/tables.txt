@@ -1,0 +1,18 @@
+                       List of relations
+ Schema |               Name                | Type  |   Owner   
+--------+-----------------------------------+-------+-----------
+ public | auth_group                        | table | notifyhub
+ public | auth_group_permissions            | table | notifyhub
+ public | auth_permission                   | table | notifyhub
+ public | auth_user                         | table | notifyhub
+ public | auth_user_groups                  | table | notifyhub
+ public | auth_user_user_permissions        | table | notifyhub
+ public | django_admin_log                  | table | notifyhub
+ public | django_content_type               | table | notifyhub
+ public | django_migrations                 | table | notifyhub
+ public | django_session                    | table | notifyhub
+ public | notifications_client              | table | notifyhub
+ public | notifications_notification        | table | notifyhub
+ public | notifications_notificationattempt | table | notifyhub
+(13 rows)
+

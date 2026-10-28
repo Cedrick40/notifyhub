@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-v9+q)6%)by$oc41k)3o*hs_5p_ta$k*s99of53q4!hycp%r+0u
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -48,6 +48,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'notifications.middleware.CorrelationIdMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -81,14 +82,22 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("DB_NAME", "notifyhub"),
-        "USER": os.getenv("DB_USER", "notifyhub"),
-        "PASSWORD": os.getenv("DB_PASSWORD", "notifyhub"),
-        "HOST": os.getenv("DB_HOST", "localhost"),
-        "PORT": os.getenv("DB_PORT", "5433"),
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
+# Override with Postgres if explicitly requested
+if os.getenv("USE_POSTGRES", "false").lower() == "true":
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv("DB_NAME", "notifyhub"),
+            "USER": os.getenv("DB_USER", "notifyhub"),
+            "PASSWORD": os.getenv("DB_PASSWORD", "notifyhub"),
+            "HOST": os.getenv("DB_HOST", "localhost"),
+            "PORT": os.getenv("DB_PORT", "5433"),
+        }
+    }
 
 
 # Password validation
@@ -144,6 +153,7 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
+    "DEFAULT_THROTTLE_CLASSES": [],
 }
 
 SPECTACULAR_SETTINGS = {
@@ -167,3 +177,45 @@ NOTIFY_LEASE_SECONDS = int(os.getenv("NOTIFY_LEASE_SECONDS", "60"))
 # Simulated provider failure rates (0.0 to 1.0)
 FAKE_TRANSIENT_RATE = float(os.getenv("FAKE_TRANSIENT_RATE", "0.3"))
 FAKE_PERMANENT_RATE = float(os.getenv("FAKE_PERMANENT_RATE", "0.05"))
+
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "json": {
+            "()": "notifications.logging_utils.JsonFormatter",
+        },
+        "simple": {
+            "format": "[{levelname}] {name}: {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "json",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": os.getenv("LOG_LEVEL", "INFO"),
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
+            "propagate": False,
+        },
+        "notifications": {
+            "handlers": ["console"],
+            "level": os.getenv("NOTIFY_LOG_LEVEL", "INFO"),
+            "propagate": False,
+        },
+        "celery": {
+            "handlers": ["console"],
+            "level": os.getenv("CELERY_LOG_LEVEL", "INFO"),
+            "propagate": False,
+        },
+    },
+}

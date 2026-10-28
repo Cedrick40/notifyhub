@@ -1,0 +1,4 @@
+2026-10-27 2caac28 new improvements
+2026-10-21 056e93d Add list and detail endpoints with ownership rules
+2026-10-21 711b5cd Add OpenAPI schema and Swagger UI
+2026-10-15 0b1ca27 Scaffold Django project, compose stack and core models

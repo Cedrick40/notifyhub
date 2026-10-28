@@ -1,0 +1,54 @@
+{
+  "id": "7a47ffee-668e-4009-bb6f-b90caf725e45",
+  "channel": "email",
+  "recipient": "customer@example.com",
+  "payload": {
+    "subject": "Order confirmed",
+    "body": "Thanks for your order"
+  },
+  "priority": 5,
+  "status": "dead",
+  "attempt_count": 5,
+  "max_attempts": 5,
+  "next_attempt_at": null,
+  "last_error": "Provider timed out (simulated)",
+  "created_at": "2026-10-28T14:07:02.041953Z",
+  "updated_at": "2026-10-28T14:07:13.566923Z",
+  "attempts": [
+    {
+      "attempt_no": 1,
+      "started_at": "2026-10-28T14:07:02.232966Z",
+      "finished_at": "2026-10-28T14:07:02.618711Z",
+      "outcome": "transient_failure",
+      "error_detail": "Provider timed out (simulated)"
+    },
+    {
+      "attempt_no": 2,
+      "started_at": "2026-10-28T14:07:04.123182Z",
+      "finished_at": "2026-10-28T14:07:04.228747Z",
+      "outcome": "transient_failure",
+      "error_detail": "Provider timed out (simulated)"
+    },
+    {
+      "attempt_no": 3,
+      "started_at": "2026-10-28T14:07:05.614768Z",
+      "finished_at": "2026-10-28T14:07:05.920404Z",
+      "outcome": "transient_failure",
+      "error_detail": "Provider timed out (simulated)"
+    },
+    {
+      "attempt_no": 4,
+      "started_at": "2026-10-28T14:07:09.544341Z",
+      "finished_at": "2026-10-28T14:07:09.726395Z",
+      "outcome": "transient_failure",
+      "error_detail": "Provider timed out (simulated)"
+    },
+    {
+      "attempt_no": 5,
+      "started_at": "2026-10-28T14:07:13.289454Z",
+      "finished_at": "2026-10-28T14:07:13.561963Z",
+      "outcome": "transient_failure",
+      "error_detail": "Provider timed out (simulated)"
+    }
+  ]
+}
