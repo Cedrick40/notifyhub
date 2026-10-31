@@ -46,11 +46,31 @@ def claim_notification(notification_id):
         notification.attempt_count += 1
         notification.locked_until = now + timedelta(seconds=settings.NOTIFY_LEASE_SECONDS)
         notification.save(update_fields=["status", "attempt_count", "locked_until", "updated_at"])
-        attempt = NotificationAttempt.objects.create(
-            notification=notification,
-            attempt_no=notification.attempt_count,
-            started_at=now,
-        )
+        existing = NotificationAttempt.objects.filter(
+            notification=notification, attempt_no=notification.attempt_count
+        ).first()
+        if existing:
+            attempt = existing
+            if not attempt.started_at:
+                attempt.started_at = now
+                attempt.save(update_fields=["started_at"])
+        else:
+            try:
+                attempt = NotificationAttempt.objects.create(
+                    notification=notification,
+                    attempt_no=notification.attempt_count,
+                    started_at=now,
+                )
+            except Exception:
+                # Fallback in case of constraint issues
+                attempt = NotificationAttempt.objects.filter(
+                    notification=notification, attempt_no=notification.attempt_count
+                ).first()
+                if not attempt:
+                    raise
+                if not attempt.started_at:
+                    attempt.started_at = now
+                    attempt.save(update_fields=["started_at"])
     try:
         log_audit("started", notification=notification, client=notification.client)
     except Exception:

@@ -194,11 +194,12 @@ class NotificationRequeueView(views.APIView):
             raise ValidationError({"status": "Only dead notifications can be requeued."})
 
         with transaction.atomic():
+            notification.attempt_log.all().delete()
             notification.status = Notification.Status.QUEUED
-            notification.attempt_count = 0
             notification.locked_until = None
             notification.next_attempt_at = None
             notification.last_error = ""
+            notification.attempt_count = 0
             notification.save(
                 update_fields=[
                     "status",
@@ -309,4 +310,31 @@ class HealthView(views.APIView):
     @extend_schema(summary="Health check")
     def get(self, request):
         return Response({"status": "ok"})
+
+
+class NotificationAuditView(views.APIView):
+    permission_classes = [IsOperator]
+
+    @extend_schema(summary="Get audit trail for a notification (operator only)")
+    def get(self, request, pk):
+        try:
+            notification = Notification.objects.get(pk=pk)
+        except Notification.DoesNotExist:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        from .models import AuditLog
+
+        logs = AuditLog.objects.filter(notification=notification).order_by("created_at")
+        data = [
+            {
+                "action": log.action,
+                "correlation_id": log.correlation_id,
+                "metadata": log.metadata,
+                "client": log.client.name if log.client else None,
+                "ip_address": log.ip_address,
+                "created_at": log.created_at.isoformat(),
+            }
+            for log in logs
+        ]
+        return Response({"notification_id": str(notification.id), "audit": data})
 

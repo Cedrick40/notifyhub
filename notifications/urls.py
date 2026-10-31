@@ -2,6 +2,7 @@ from django.urls import path
 
 from .views import (
     MetricsView,
+    NotificationAuditView,
     NotificationCancelView,
     NotificationDetailView,
     NotificationListCreateView,
@@ -13,5 +14,6 @@ urlpatterns = [
     path("notifications/<uuid:pk>", NotificationDetailView.as_view(), name="notification-detail"),
     path("notifications/<uuid:pk>/requeue", NotificationRequeueView.as_view(), name="notification-requeue"),
     path("notifications/<uuid:pk>/cancel", NotificationCancelView.as_view(), name="notification-cancel"),
+    path("notifications/<uuid:pk>/audit", NotificationAuditView.as_view(), name="notification-audit"),
     path("metrics", MetricsView.as_view(), name="metrics"),
 ]
